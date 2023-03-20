@@ -1,13 +1,21 @@
-import { deepStrictEqual, notEqual, strictEqual } from 'assert';
+import { notEqual, strictEqual } from 'assert';
 import { Mock } from 'lite-ts-mock';
-import CircuitBreaker from 'opossum';
+import { RpcBase } from 'lite-ts-rpc';
 
 import { CircuitBreakerRpc as Self } from './circuit-breaker-rpc';
 
 describe('circuit-breaker-rpc', () => {
     describe('callWithoutThrow', () => {
         it('closed', async () => {
-            const self = new Self();
+            const mockRpc = new Mock<RpcBase>({
+                callWithoutThrow() {
+                    return {
+                        err: 0,
+                        data: {}
+                    };
+                }
+            });
+            const self = new Self(mockRpc.actual);
             Reflect.set(
                 self,
                 'm_Breaker',
@@ -28,18 +36,13 @@ describe('circuit-breaker-rpc', () => {
             });
             strictEqual(res.err, 0);
         });
-        it('opened', async () => {
-            const mockBreaker = new Mock<CircuitBreaker>({
-                fire() {
+        it.only('opened', async () => {
+            const mockRpc = new Mock<RpcBase>({
+                callWithoutThrow() {
                     throw new Error('out of service');
                 }
             });
-            const self = new Self();
-            Reflect.set(
-                self,
-                'm_Breaker',
-                mockBreaker.actual
-            );
+            const self = new Self(mockRpc.actual);
 
             let err1;
             try {
@@ -53,27 +56,34 @@ describe('circuit-breaker-rpc', () => {
             notEqual(err1, undefined);
         });
         it.only('half-opened', async () => {
-            const mockBreaker = new Mock<CircuitBreaker>({
-                fire() {
+            const mockRpc = new Mock<RpcBase>({
+                callWithoutThrow() {
                     return {
                         err: 0,
                         data: {}
                     };
                 }
             });
-            mockBreaker.expected.halfOpen;
-            const self = new Self();
+            const self = new Self(mockRpc.actual);
             Reflect.set(
                 self,
                 'm_Breaker',
-                mockBreaker.actual
+                null
+            );
+            Reflect.set(
+                self,
+                'options',
+                {
+                    errorThresholdPercentage: 80, // 触发熔断的比例
+                    timeout: 1000, // 超时时间
+                    resetTimeout: 600000, // 重试时间 
+                }
             );
 
-            const resp = await self.callWithoutThrow({
+            const res = await self.callWithoutThrow({
                 route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
             });
-
-            deepStrictEqual(resp.err, 0);
+            strictEqual(res.err, 0);
         });
     });
 });
