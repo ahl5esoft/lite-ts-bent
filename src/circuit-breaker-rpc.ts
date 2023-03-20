@@ -8,7 +8,7 @@ export class CircuitBreakerRpc extends BentRpc {
     /**
      *  熔断实例
      */
-    private m_Breakers: { [key: string]: CircuitBreaker; } = {};
+    private m_Breaker: CircuitBreaker;
 
     /**
      * 熔断选项
@@ -20,15 +20,14 @@ export class CircuitBreakerRpc extends BentRpc {
     };
 
     public async callWithoutThrow<T>(req: CircuitBreakerRpcCallOption) {
-        const abortController = new AbortController();
-        const options = {
-            abortController,
-            ...this.options,
-            ...req.breakerOptions
-        };
-
-        if (!this.m_Breakers || !this.m_Breakers[req.app]) {
-            this.m_Breakers[req.app] = new CircuitBreaker(
+        if (!this.m_Breaker || !this.m_Breaker) {
+            const abortController = new AbortController();
+            const options = {
+                abortController,
+                ...this.options,
+                ...req.breakerOptions
+            };
+            this.m_Breaker = new CircuitBreaker(
                 async (
                     route: string,
                     body: RpcCallOption["body"],
@@ -44,7 +43,6 @@ export class CircuitBreakerRpc extends BentRpc {
             );
         }
 
-
-        return await this.m_Breakers[req.app].fire(req.route, req.body, req.header) as ApiResponse<T>;
+        return await this.m_Breaker.fire(req.route, req.body, req.header) as ApiResponse<T>;
     }
 }

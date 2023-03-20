@@ -1,8 +1,12 @@
+import { deepStrictEqual, notEqual, strictEqual } from 'assert';
+import { Mock } from 'lite-ts-mock';
+import CircuitBreaker from 'opossum';
+
 import { CircuitBreakerRpc as Self } from './circuit-breaker-rpc';
 
 describe('circuit-breaker-rpc', () => {
     describe('callWithoutThrow', () => {
-        it('not any breaker', async () => {
+        it('closed', async () => {
             const self = new Self();
             Reflect.set(
                 self,
@@ -19,32 +23,57 @@ describe('circuit-breaker-rpc', () => {
                 }
             );
 
-            console.log('第一次请求：');
-            const res1 = await self.callWithoutThrow({
-                route: 'https://z-api.dengyou.net/prop/ih/find-all-enums',
-                app: 'prop'
+            const res = await self.callWithoutThrow({
+                route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
             });
-            console.log(res1);
-
-            for (let i = 0; i < 20; i++) {
-                try {
-                    console.log(`第${i}次请求：`);
-                    await self.callWithoutThrow({
-                        route: 'https://www.google.com',
-                        app: 'google'
-                    });
-                } catch (e) {
-                    console.log(e);
+            strictEqual(res.err, 0);
+        });
+        it('opened', async () => {
+            const mockBreaker = new Mock<CircuitBreaker>({
+                fire() {
+                    throw new Error('out of service');
                 }
+            });
+            const self = new Self();
+            Reflect.set(
+                self,
+                'm_Breaker',
+                mockBreaker.actual
+            );
+
+            let err1;
+            try {
+                await self.callWithoutThrow({
+                    route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
+                });
+            } catch (err) {
+                err1 = err;
             }
 
-            console.log('熔断后请求其他服务：');
-            const res2 = await self.callWithoutThrow({
-                route: 'https://z-api.dengyou.net/prop/ih/find-all-enums',
-                app: 'prop'
-            });
-            console.log(res2);
+            notEqual(err1, undefined);
         });
+        it.only('half-opened', async () => {
+            const mockBreaker = new Mock<CircuitBreaker>({
+                fire() {
+                    return {
+                        err: 0,
+                        data: {}
+                    };
+                }
+            });
+            mockBreaker.expected.halfOpen;
+            const self = new Self();
+            Reflect.set(
+                self,
+                'm_Breaker',
+                mockBreaker.actual
+            );
 
+            const resp = await self.callWithoutThrow({
+                route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
+            });
+
+            deepStrictEqual(resp.err, 0);
+        });
     });
 });
