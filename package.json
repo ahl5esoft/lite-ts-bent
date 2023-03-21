@@ -3,13 +3,12 @@
     "bugs": {
         "url": "https://github.com/ahl5esoft/lite-ts-bent/issues"
     },
-    "description": "服务请求(基于bent)",
     "dependencies": {
         "bent": "^7.3.12",
-        "js-yaml": "^4.1.0",
         "lite-ts-rpc": "^1.2.0",
         "opossum": "^7.1.0"
     },
+    "description": "服务请求(基于bent)",
     "devDependencies": {
         "@types/bent": "^7.3.2",
         "@types/js-yaml": "^4.0.5",
