@@ -12,8 +12,8 @@ export class CircuitBreakerRpc extends RpcBase {
      */
     private m_Options: CircuitBreaker.Options = {
         errorThresholdPercentage: 50, // 触发熔断的比例
-        timeout: 10_000, // 超时时间
         resetTimeout: 30_000, // 重试时间
+        timeout: 10_000, // 超时时间
     };
 
     public constructor(
