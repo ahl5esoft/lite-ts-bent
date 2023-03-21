@@ -12,8 +12,8 @@ export class CircuitBreakerRpc extends RpcBase {
      */
     private m_Options: CircuitBreaker.Options = {
         errorThresholdPercentage: 50, // 触发熔断的比例
-        timeout: 10_000, // 超时时间
         resetTimeout: 30_000, // 重试时间
+        timeout: 10_000, // 超时时间
     };
 
     public constructor(
@@ -22,24 +22,14 @@ export class CircuitBreakerRpc extends RpcBase {
     ) {
         super();
 
-        if (options)
-            this.m_Options = options;
+        Object.assign(this.m_Options, options);
     }
 
     public async callWithoutThrow<T>(req: RpcCallOption) {
-        if (!this.m_Breaker || !this.m_Breaker) {
-            const abortController = new AbortController();
-            const options = {
-                abortController,
-                ...this.m_Options,
-            };
-            this.m_Breaker = new CircuitBreaker(
-                async (req: RpcCallOption) => {
-                    return await this.m_Rpc.callWithoutThrow(req);
-                },
-                options
-            );
-        }
+        this.m_Breaker ??= new CircuitBreaker(
+            async (req: RpcCallOption) => {
+                return await this.m_Rpc.callWithoutThrow(req);
+            }, this.m_Options);
 
         return await this.m_Breaker.fire(req) as ApiResponse<T>;
     }
