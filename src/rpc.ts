@@ -28,6 +28,8 @@ export class BentRpc extends RpcBase {
             throw new Error(`缺少TargetTypeData.app[${app}] http[${env || '""'}]配置`);
 
         try {
+            req.body ??= {};
+            req.body.areaNo ??= req.areaNo;
             return await bent<bent.Json>(targetTypeData.http[env], 'json', 'POST', 200)(`/ih/${routeArgs.pop()}`, req.body, req.header) as ApiResponse<T>;
         } catch (ex) {
             this.m_LogFactory?.build().error(ex);
