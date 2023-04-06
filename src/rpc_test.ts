@@ -21,7 +21,7 @@ describe('src/rpc.ts', () => {
                 log.actual
             );
 
-            const res = await self.callWithoutThrow({
+            const res = await self.call({
                 route: '/prop/ih/find-all-enums',
             });
 

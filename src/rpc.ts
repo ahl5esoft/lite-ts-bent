@@ -11,14 +11,14 @@ export class BentRpc extends RpcBase {
         super();
     }
 
-    public async callWithoutThrow<T>(req: RpcCallOption) {
-        const routeArgs = req.route.split('/');
+    protected async onCall<T>(v: RpcCallOption) {
+        const routeArgs = v.route.split('/');
 
-        req.body ??= {};
-        req.body.areaNo ??= req.areaNo;
+        v.body ??= {};
+        v.body.areaNo ??= v.areaNo;
 
         try {
-            return await bent<bent.Json>(this.m_Url, 'json', 'POST', 200)(`/ih/${routeArgs.pop()}`, req.body, req.header) as ApiResponse<T>;
+            return await bent<bent.Json>(this.m_Url, 'json', 'POST', 200)(`/ih/${routeArgs.pop()}`, v.body, v.header) as ApiResponse<T>;
         } catch (ex) {
             this.m_LogFactory.build().error(ex);
             return {

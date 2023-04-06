@@ -25,10 +25,10 @@ export class CircuitBreakerRpc extends RpcBase {
         Object.assign(this.m_Options, options);
     }
 
-    public async callWithoutThrow<T>(req: RpcCallOption) {
+    protected async onCall<T>(req: RpcCallOption) {
         this.m_Breaker ??= new CircuitBreaker(
             async (req: RpcCallOption) => {
-                return await this.m_Rpc.callWithoutThrow(req);
+                return await this.m_Rpc.call(req);
             }, this.m_Options);
 
         return await this.m_Breaker.fire(req) as ApiResponse<T>;

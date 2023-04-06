@@ -15,7 +15,7 @@ export class BentServerRpc extends RpcBase {
         super();
     }
 
-    public async callWithoutThrow<T>(req: RpcCallOption) {
+    protected async onCall<T>(req: RpcCallOption) {
         const routeArgs = req.route.split('/');
         const app = routeArgs[1];
 
@@ -35,7 +35,7 @@ export class BentServerRpc extends RpcBase {
         if (!this.m_LoadBalanceRpc[req.areaNo][app])
             throw new Error(`缺少${AreaData.name}[${req.areaNo}].loadBalance[${app}]配置`);
 
-        return await this.m_LoadBalanceRpc[req.areaNo][app].callWithoutThrow<T>({
+        return await this.m_LoadBalanceRpc[req.areaNo][app].call<T>({
             areaNo: req.areaNo,
             route: `/ih/${routeArgs.pop()}`,
             body: req.body,
