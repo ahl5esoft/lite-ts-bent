@@ -5,8 +5,8 @@
     },
     "dependencies": {
         "bent": "^7.3.12",
-        "lite-ts-enum": "^1.6.0",
-        "lite-ts-rpc": "^1.6.0",
+        "lite-ts-enum": "^1.6.1",
+        "lite-ts-rpc": "^1.8.0",
         "opossum": "^7.1.0"
     },
     "description": "服务请求(基于bent)",

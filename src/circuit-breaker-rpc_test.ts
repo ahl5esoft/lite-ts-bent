@@ -8,7 +8,7 @@ describe('circuit-breaker-rpc', () => {
     describe('callWithoutThrow', () => {
         it('closed', async () => {
             const mockRpc = new Mock<RpcBase>({
-                callWithoutThrow() {
+                call() {
                     return {
                         err: 0,
                         data: {}
@@ -31,12 +31,13 @@ describe('circuit-breaker-rpc', () => {
                 }
             );
 
-            const res = await self.callWithoutThrow({
+            const res = await self.call({
                 route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
             });
             strictEqual(res.err, 0);
         });
-        it.only('opened', async () => {
+
+        it('opened', async () => {
             const mockRpc = new Mock<RpcBase>({
                 callWithoutThrow() {
                     throw new Error('out of service');
@@ -46,7 +47,7 @@ describe('circuit-breaker-rpc', () => {
 
             let err1;
             try {
-                await self.callWithoutThrow({
+                await self.call({
                     route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
                 });
             } catch (err) {
@@ -55,9 +56,10 @@ describe('circuit-breaker-rpc', () => {
 
             notEqual(err1, undefined);
         });
-        it.only('half-opened', async () => {
+
+        it('half-opened', async () => {
             const mockRpc = new Mock<RpcBase>({
-                callWithoutThrow() {
+                call() {
                     return {
                         err: 0,
                         data: {}
@@ -80,7 +82,7 @@ describe('circuit-breaker-rpc', () => {
                 }
             );
 
-            const res = await self.callWithoutThrow({
+            const res = await self.call({
                 route: 'https://z-api.dengyou.net/prop/ih/find-all-enums'
             });
             strictEqual(res.err, 0);

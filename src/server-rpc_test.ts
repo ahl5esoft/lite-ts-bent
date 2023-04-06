@@ -6,7 +6,7 @@ import { AreaData, RpcBase } from 'lite-ts-rpc';
 import { BentServerRpc as Self } from './server-rpc';
 
 describe('src/rpc.ts', () => {
-    describe('.callWithoutThrow<T>(req: BentRpcCallOption)', () => {
+    describe('.onCall<T>(req: BentRpcCallOption)', () => {
         it('ok', async () => {
             const enumFactoryMock = new Mock<EnumFactoryBase>();
             const rpcMock = new Mock<RpcBase>();
@@ -32,7 +32,7 @@ describe('src/rpc.ts', () => {
             );
 
             rpcMock.expectReturn(
-                r => r.callWithoutThrow({
+                r => r.call({
                     areaNo: 1,
                     route: '/ih/find-enum-items',
                     body: undefined,
@@ -44,7 +44,7 @@ describe('src/rpc.ts', () => {
                 }
             );
 
-            const res = await self.callWithoutThrow({
+            const res = await self.call({
                 route: '/prop/find-enum-items',
                 areaNo: 1
             });
