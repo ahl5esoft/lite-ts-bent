@@ -1,4 +1,4 @@
-import { ApiResponse, RpcBase, RpcCallOption } from 'lite-ts-rpc';
+import { RpcBase, RpcCallOption, RpcResponse } from 'lite-ts-rpc';
 import CircuitBreaker from 'opossum';
 
 export class CircuitBreakerRpc extends RpcBase {
@@ -30,6 +30,6 @@ export class CircuitBreakerRpc extends RpcBase {
             return await this.m_Rpc.call(req);
         }, this.m_Options);
 
-        return await this.m_Breaker.fire(req) as ApiResponse<T>;
+        return await this.m_Breaker.fire(req) as RpcResponse<T>;
     }
 }
