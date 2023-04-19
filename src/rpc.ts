@@ -1,5 +1,5 @@
 import bent from 'bent';
-import { ApiResponse, RpcBase, RpcCallOption } from 'lite-ts-rpc';
+import { RpcBase, RpcCallOption, RpcResponse } from 'lite-ts-rpc';
 
 import { ILogFactory } from './i-log-factory';
 
@@ -17,7 +17,7 @@ export class BentRpc extends RpcBase {
             v.body.areaNo ??= v.areaNo;
 
             const routeArgs = v.route.split('/');
-            return await bent<bent.Json>(this.m_Url, 'json', 'POST', 200)(`/ih/${routeArgs.pop()}`, v.body, v.header) as ApiResponse<T>;
+            return await bent<bent.Json>(this.m_Url, 'json', 'POST', 200)(`/ih/${routeArgs.pop()}`, v.body, v.header) as RpcResponse<T>;
         } catch (ex) {
             this.m_LogFactory.build().error(ex);
             return {
