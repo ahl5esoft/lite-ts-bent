@@ -5,7 +5,8 @@
     },
     "dependencies": {
         "bent": "^7.3.12",
-        "lite-ts-enum": "^1.9.1",
+        "lite-ts-config": "^2.1.1",
+        "lite-ts-log": "^1.1.0",
         "lite-ts-rpc": "^2.9.0",
         "opossum": "^7.1.0"
     },

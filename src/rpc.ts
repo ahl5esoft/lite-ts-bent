@@ -1,12 +1,11 @@
 import bent from 'bent';
-import { RpcBase, RpcCallOption, RpcResponse } from 'lite-ts-rpc';
-
-import { ILogFactory } from './i-log-factory';
+import { LogFactoryBase } from 'lite-ts-log';
+import { RpcResponse, RpcBase, RpcCallOption } from 'lite-ts-rpc';
 
 export class BentRpc extends RpcBase {
     public constructor(
         private m_Url: string,
-        private m_LogFactory: ILogFactory,
+        private m_LogFactory: LogFactoryBase,
     ) {
         super();
     }

@@ -1,16 +1,16 @@
-import { EnumFactoryBase } from 'lite-ts-enum';
-import { AreaData, RpcBase, RpcCallOption } from 'lite-ts-rpc';
+import { ConfigLoaderBase } from 'lite-ts-config';
+import { RpcBase, RpcCallOption } from 'lite-ts-rpc';
+
+export class LoadBalance {
+    [app: string]: string;
+}
 
 export class BentServerRpc extends RpcBase {
-    private m_LoadBalanceRpc: {
-        [areaNo: number]: {
-            [app: string]: RpcBase;
-        };
-    } = {};
+    private m_LoadBalanceRpc: Promise<{ [app: string]: RpcBase; }>;
 
     public constructor(
         private m_BuildRpcFunc: (url: string) => RpcBase,
-        private m_EnumFactory: EnumFactoryBase,
+        private m_ConfigLoader: ConfigLoaderBase
     ) {
         super();
     }
@@ -20,22 +20,26 @@ export class BentServerRpc extends RpcBase {
         const app = routeArgs[1];
 
         req.areaNo ??= 0;
-        const allItems = await this.m_EnumFactory.build(AreaData).allItem;
-        const areaData = allItems?.[req.areaNo];
-        if (!areaData)
-            throw new Error(`缺少${AreaData.name}.value = ${req.areaNo} 配置`);
+        this.m_LoadBalanceRpc ??= new Promise<{ [app: string]: RpcBase; }>(async (s, f) => {
+            try {
+                const cfg = await this.m_ConfigLoader.load(LoadBalance);
+                s(
+                    Object.entries(cfg).reduce((memo, [app, url]) => {
+                        memo[app] = this.m_BuildRpcFunc(url);
+                        return memo;
+                    }, {})
+                );
+            } catch (ex) {
+                f(ex);
+            }
+        });
 
-        if (!this.m_LoadBalanceRpc[req.areaNo]) {
-            this.m_LoadBalanceRpc[req.areaNo] = Object.entries(areaData.loadBalance).reduce((memo, [k, v]) => {
-                memo[k] = this.m_BuildRpcFunc(v);
-                return memo;
-            }, {});
-        }
+        const loadBalanceRpc = await this.m_LoadBalanceRpc;
 
-        if (!this.m_LoadBalanceRpc[req.areaNo][app])
-            throw new Error(`缺少${AreaData.name}[${req.areaNo}].loadBalance[${app}]配置`);
+        if (!loadBalanceRpc[app])
+            throw new Error(`缺少${LoadBalance.name}.${app}配置`);
 
-        return await this.m_LoadBalanceRpc[req.areaNo][app].call<T>({
+        return await loadBalanceRpc[app].call<T>({
             areaNo: req.areaNo,
             route: `/ih/${routeArgs.pop()}`,
             body: req.body,
