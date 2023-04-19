@@ -2,14 +2,8 @@ import { RpcBase, RpcCallOption, RpcResponse } from 'lite-ts-rpc';
 import CircuitBreaker from 'opossum';
 
 export class CircuitBreakerRpc extends RpcBase {
-    /**
-     *  熔断实例
-     */
     private m_Breaker: CircuitBreaker;
 
-    /**
-     * 熔断选项
-     */
     private m_Options: CircuitBreaker.Options = {
         errorThresholdPercentage: 50, // 触发熔断的比例
         resetTimeout: 30_000, // 重试时间

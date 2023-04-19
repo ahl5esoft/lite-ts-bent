@@ -1,16 +1,10 @@
-import { ConfigLoaderBase } from 'lite-ts-config';
 import { RpcBase, RpcCallOption } from 'lite-ts-rpc';
-
-export class LoadBalance {
-    [app: string]: string;
-}
 
 export class BentServerRpc extends RpcBase {
     private m_LoadBalanceRpc: Promise<{ [app: string]: RpcBase; }>;
 
     public constructor(
-        private m_BuildRpcFunc: (url: string) => RpcBase,
-        private m_ConfigLoader: ConfigLoaderBase
+        private m_GetLoadBalanceRpcFunc: () => Promise<{ [app: string]: RpcBase; }>,
     ) {
         super();
     }
@@ -20,24 +14,10 @@ export class BentServerRpc extends RpcBase {
         const app = routeArgs[1];
 
         req.areaNo ??= 0;
-        this.m_LoadBalanceRpc ??= new Promise<{ [app: string]: RpcBase; }>(async (s, f) => {
-            try {
-                const cfg = await this.m_ConfigLoader.load(LoadBalance);
-                s(
-                    Object.entries(cfg).reduce((memo, [app, url]) => {
-                        memo[app] = this.m_BuildRpcFunc(url);
-                        return memo;
-                    }, {})
-                );
-            } catch (ex) {
-                f(ex);
-            }
-        });
-
+        this.m_LoadBalanceRpc ??= this.m_GetLoadBalanceRpcFunc();
         const loadBalanceRpc = await this.m_LoadBalanceRpc;
-
         if (!loadBalanceRpc[app])
-            throw new Error(`缺少${LoadBalance.name}.${app}配置`);
+            throw new Error(`${BentServerRpc.name}: 缺少配置[${app}]`);
 
         return await loadBalanceRpc[app].call<T>({
             areaNo: req.areaNo,
