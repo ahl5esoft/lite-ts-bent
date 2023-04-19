@@ -1,34 +1,24 @@
 import { deepStrictEqual } from 'assert';
-import { Enum, EnumFactoryBase } from 'lite-ts-enum';
+import { ConfigLoaderBase } from 'lite-ts-config';
 import { Mock } from 'lite-ts-mock';
-import { AreaData, RpcBase } from 'lite-ts-rpc';
+import { RpcBase } from 'lite-ts-rpc';
 
-import { BentServerRpc as Self } from './server-rpc';
+import { BentServerRpc as Self, LoadBalance } from './server-rpc';
 
 describe('src/rpc.ts', () => {
     describe('.onCall<T>(req: BentRpcCallOption)', () => {
         it('ok', async () => {
-            const enumFactoryMock = new Mock<EnumFactoryBase>();
+            const configLoaderMock = new Mock<ConfigLoaderBase>();
             const rpcMock = new Mock<RpcBase>();
             const self = new Self(() => {
                 return rpcMock.actual;
-            }, enumFactoryMock.actual);
+            }, configLoaderMock.actual);
 
-            const enumAreaMock = new Mock<Enum<AreaData>>({
-                get allItem() {
-                    return {
-                        1: {
-                            value: 1,
-                            loadBalance: {
-                                prop: 'http://localhost:30000'
-                            }
-                        }
-                    };
+            configLoaderMock.expectReturn(
+                r => r.load(LoadBalance),
+                {
+                    prop: 'http://localhost:30000'
                 }
-            });
-            enumFactoryMock.expectReturn(
-                r => r.build(AreaData),
-                enumAreaMock.actual
             );
 
             rpcMock.expectReturn(
