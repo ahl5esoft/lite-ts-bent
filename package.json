@@ -6,7 +6,7 @@
     "dependencies": {
         "bent": "^7.3.12",
         "lite-ts-log": "^1.1.0",
-        "lite-ts-rpc": "^3.9.1",
+        "lite-ts-rpc": "^3.11.0",
         "opossum": "^7.1.0"
     },
     "description": "服务请求(基于bent)",
