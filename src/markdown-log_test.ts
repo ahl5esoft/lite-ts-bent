@@ -1,11 +1,9 @@
-import { BentDingDingMarkdownPush } from './ding-ding-markdown-push'
 import { BentMarkdownLog } from './markdown-log';
 
 describe('src/markdown-log.ts', () => {
     describe('push', () => {
         it('ok', async () => {
-            const dingTalkPush = new BentDingDingMarkdownPush('dev-ops:', 'https://oapi.dingtalk.com/robot/send?');
-            const markdownLog = new BentMarkdownLog(dingTalkPush);
+            const markdownLog = new BentMarkdownLog('dev-ops:', 'https://oapi.dingtalk.com/robot/send?access_token=2c662f0ba1ac4a04d459cf6498d2e05a004998604c4be12c3498ce1a591b7ddd');
             markdownLog.addLabel(
                 '测试',
                 `错误输出: :  (node:74246) Warning: Accessing non-existent property 'padLevels' of module exports inside circular dependency (Use
